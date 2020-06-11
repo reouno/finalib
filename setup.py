@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='finalib',
-      version='0.0.1',
+      version='0.0.2',
       description='Python finance utilities',
       author='UNO Leo',
       author_email='leouno12@gmail.com',
