@@ -1,1 +1,1 @@
-from . import finalib
+from .finalib import *

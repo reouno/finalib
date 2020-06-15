@@ -7,7 +7,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 # pylint: disable=import-error
-import finalib.finalib as fl
+import finalib as fl
 
 def test_PurgedKFold_no_purge_no_embargo():
     df = pd.DataFrame({'A': [0, 1]})
