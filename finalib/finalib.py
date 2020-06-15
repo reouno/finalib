@@ -76,15 +76,15 @@ class PurgedKFold(_BaseKFold):
         n_embargo = int(X.shape[0] * self.pct_embargo)
         test_starts = [(i[0], i[-1]+1) for i in _np.array_split(indices, self.n_splits)]
         for i, j in test_starts:
-            if self.n_overlaps > 0:
+            if i != 0 and self.n_overlaps > 0:
                 train_f_purge = round(self.n_overlaps * train_ratio)
                 train_f_idx1 = i - train_f_purge
                 test_idx0 = i + (self.n_overlaps - train_f_purge)
             else:
                 train_f_idx1 = test_idx0 = i
 
-            if n_embargo > 0:
-                purge_range = self.n_overlaps + n_embargo
+            purge_range = self.n_overlaps + n_embargo
+            if j != X.shape[0] and purge_range > 0:
                 train_l_purge = round(purge_range * train_ratio)
                 test_idx1 = j - (purge_range - train_l_purge)
                 train_l_idx0 = j + train_l_purge
