@@ -8,5 +8,5 @@ setup(name='finalib',
       author='UNO Leo',
       author_email='leouno12@gmail.com',
       url='https://github.com/tmtlu/finalib',
-      packages=['finalib'],
+      packages=['finalib', 'finalib.mine'],
      )
