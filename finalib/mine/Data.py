@@ -4,8 +4,8 @@ import pandas as pd
 from abc import ABC
 from typing import Tuple
 
-from Inputs import Inputs
-from Outputs import Outputs
+from .Inputs import Inputs
+from .Outputs import Outputs
 
 __all__ = ['Data']
 
