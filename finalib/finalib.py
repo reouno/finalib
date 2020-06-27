@@ -25,10 +25,9 @@ def make_nbars(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close'], d
     # correct bar date (or datetime)
     if datetime_col is not None:
         df[datetime_col] = df[datetime_col][n_bars:].append(
-            _pd.Series(['-']*n_bars)).reset_index(drop=True)
+            _pd.Series([_np.nan]*n_bars)).reset_index(drop=True)
 
-    # delete last n rows as they have nan values
-    df = df[:-n_bars]
+    df = df.dropna()
 
     return df
 
@@ -55,9 +54,11 @@ def split_data(df: _pd.DataFrame, ratio: float, purging: bool = True, n_bars: in
 
     return df1, df2
 
+
 class PurgedKFold(_BaseKFold):
     """K-Fold with purging and embargo for finantial sequence data
     """
+
     def __init__(self, n_splits=5, n_overlaps=0, pct_embargo=0.):
         """constructor
 
@@ -66,7 +67,8 @@ class PurgedKFold(_BaseKFold):
             n_overlaps (int, optional): Temporal overlap between adjacent samples in which samples are purged. Defaults to 0.
             pct_embargo ([type], optional): Percent of embargo. Defaults to 0..
         """
-        super(PurgedKFold, self).__init__(n_splits, shuffle=False, random_state=None)
+        super(PurgedKFold, self).__init__(
+            n_splits, shuffle=False, random_state=None)
         self.n_overlaps = n_overlaps
         self.pct_embargo = pct_embargo
 
@@ -74,7 +76,8 @@ class PurgedKFold(_BaseKFold):
         train_ratio = (self.n_splits - 1) / self.n_splits
         indices = _np.arange(X.shape[0])
         n_embargo = int(X.shape[0] * self.pct_embargo)
-        test_starts = [(i[0], i[-1]+1) for i in _np.array_split(indices, self.n_splits)]
+        test_starts = [(i[0], i[-1]+1)
+                       for i in _np.array_split(indices, self.n_splits)]
         for i, j in test_starts:
             if i != 0 and self.n_overlaps > 0:
                 train_f_purge = round(self.n_overlaps * train_ratio)
@@ -96,18 +99,3 @@ class PurgedKFold(_BaseKFold):
             train_l_indices = _pd.Series(X.iloc[train_l_idx0:].index)
             train_indices = _pd.concat([train_f_indices, train_l_indices])
             yield train_indices, test_indices
-
-if __name__ == '__main__':
-    df = _pd.DataFrame({'Date': ['12/23/1991', '12/24/1991', '12/25/1991'],
-                        'Open': _np.arange(3.0), 'Close': _np.arange(10.0, 13)})
-    expected = _pd.DataFrame({
-        'Date': ['12/25/1991'],
-        'Open2': 0.0,
-        'Close2': 10.0,
-        'Open1': 1.0,
-        'Close1': 11.0,
-        'Open0': 2.0,
-        'Close0': 12.0
-    })
-    assert (expected.equals(make_nbars(df, 2, cols=[
-            'Open', 'Close'], datetime_col='Date')))

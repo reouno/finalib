@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 import os
@@ -9,6 +10,22 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 import finalib as fl  # pylint: disable=import-error
+
+def test_make_nbars():
+    df = pd.DataFrame({'Date': ['12/23/1991', '12/24/1991', '12/25/1991'],
+                       'Open': np.arange(3.0), 'Close': np.arange(10.0, 13)})
+    expected = pd.DataFrame({
+        'Date': ['12/25/1991'],
+        'Open2': 0.0,
+        'Close2': 10.0,
+        'Open1': 1.0,
+        'Close1': 11.0,
+        'Open0': 2.0,
+        'Close0': 12.0
+    })
+    assert expected.equals(fl.make_nbars(df, 2, cols=[
+                           'Open', 'Close'], datetime_col='Date'))
+
 
 def test_PurgedKFold_2_no_purge_no_embargo():
     df = pd.DataFrame({'A': [0, 1]})
