@@ -4,6 +4,11 @@ from distutils.core import setup
 
 setup(name='finalib',
       version='0.2.1',
+      install_requires=[
+            'numpy',
+            'pandas',
+            'debtcollector',      
+      ],
       description='Python finance utilities',
       author='UNO Leo',
       author_email='leouno12@gmail.com',
