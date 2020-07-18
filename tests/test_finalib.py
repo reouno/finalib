@@ -11,7 +11,7 @@ sys.path.insert(0, parentdir)
 
 import finalib as fl  # pylint: disable=import-error
 
-def test_make_nbars():
+def test_make_nbars_past():
     df = pd.DataFrame({'Date': ['12/23/1991', '12/24/1991', '12/25/1991'],
                        'Open': np.arange(3.0), 'Close': np.arange(10.0, 13)})
     expected = pd.DataFrame({
@@ -23,7 +23,23 @@ def test_make_nbars():
         'Open0': 2.0,
         'Close0': 12.0
     })
-    assert expected.equals(fl.make_nbars(df, 2, cols=[
+    assert expected.equals(fl.make_nbars_past(df, 2, cols=[
+                           'Open', 'Close'], datetime_col='Date'))
+
+
+def test_make_nbars_future():
+    df = pd.DataFrame({'Date': ['12/23/1991', '12/24/1991', '12/25/1991'],
+                       'Open': np.arange(3.0), 'Close': np.arange(10.0, 13)})
+    expected = pd.DataFrame({
+        'Date': ['12/23/1991'],
+        'Open0': 0.0,
+        'Close0': 10.0,
+        'Open1': 1.0,
+        'Close1': 11.0,
+        'Open2': 2.0,
+        'Close2': 12.0
+    })
+    assert expected.equals(fl.make_nbars_future(df, 2, cols=[
                            'Open', 'Close'], datetime_col='Date'))
 
 

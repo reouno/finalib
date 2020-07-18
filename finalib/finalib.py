@@ -7,8 +7,8 @@ from typing import Tuple as _Tuple
 from typing import Union as _Union
 
 
-def make_nbars(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close'], datetime_col: _Union[_Text, None] = 'Date') -> _pd.DataFrame:
-    """Make n bars dataframe.
+def make_nbars_past(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close'], datetime_col: _Union[_Text, None] = 'Date') -> _pd.DataFrame:
+    """Make n bars dataframe seeing past n bars.
     The row size of `df` must be greater than or equal to `n_bars`, or raise ValueError.
     """
     if df.shape[0] < n_bars + 1:
@@ -26,6 +26,25 @@ def make_nbars(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close'], d
     if datetime_col is not None:
         df[datetime_col] = df[datetime_col][n_bars:].append(
             _pd.Series([_np.nan]*n_bars)).reset_index(drop=True)
+
+    df = df.dropna()
+
+    return df
+
+
+def make_nbars_future(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close'], datetime_col: _Union[_Text, None] = 'Date') -> _pd.DataFrame:
+    """Make n bars dataframe seeing future n bars.
+    The row size of `df` must be greater than or equal to `n_bars`, or raise ValueError.
+    """
+    if df.shape[0] < n_bars + 1:
+        raise ValueError(
+            f'row size of the df (={df.shape[0]}) must be greater than or equal to n_bars + 1 (={n_bars + 1})')
+    df = df.rename(columns={col: f'{col}0' for col in cols})
+
+    for i in range(1, n_bars+1):
+        for col in cols:
+            df[f'{col}{i}'] = df[f'{col}0'][i:].append(
+                _pd.Series([_np.nan]*i)).reset_index(drop=True)
 
     df = df.dropna()
 
