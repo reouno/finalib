@@ -1,11 +1,15 @@
 import numpy as _np
 import pandas as _pd
+import warnings
 from sklearn.model_selection._split import _BaseKFold
 from typing import List as _List
 from typing import Text as _Text
 from typing import Tuple as _Tuple
 from typing import Union as _Union
+from debtcollector import moves
+warnings.simplefilter('always')
 
+__all__ = ['make_nbars_past', 'make_nbars', 'make_nbars_future', 'split_data', 'PurgedKFold']
 
 def make_nbars_past(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close'], datetime_col: _Union[_Text, None] = 'Date') -> _pd.DataFrame:
     """Make n bars dataframe seeing past n bars.
@@ -32,9 +36,24 @@ def make_nbars_past(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close
     return df
 
 
-def make_nbars_future(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close'], datetime_col: _Union[_Text, None] = 'Date') -> _pd.DataFrame:
+make_nbars = moves.moved_function(make_nbars_past, 'make_nbars', __name__)
+
+
+def make_nbars_future(df: _pd.DataFrame, n_bars: int, cols: _List[str] = ['Close'], datetime_col: _Union[str, None] = 'Date') -> _pd.DataFrame:
     """Make n bars dataframe seeing future n bars.
     The row size of `df` must be greater than or equal to `n_bars`, or raise ValueError.
+
+    Args:
+        df (DataFrame): target data frame.
+        n_bars (int): number of bars.
+        cols (List[str], optional): column names. Defaults to ['Close'].
+        datetime_col (Union[str, None], optional): datetime column name. Defaults to 'Date'.
+
+    Raises:
+        ValueError: The error is raised when the row size of `df` is smaller than `n_bars`.
+
+    Returns:
+        DataFrame: data that can see future n bars
     """
     if df.shape[0] < n_bars + 1:
         raise ValueError(

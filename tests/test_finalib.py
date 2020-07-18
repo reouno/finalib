@@ -27,6 +27,22 @@ def test_make_nbars_past():
                            'Open', 'Close'], datetime_col='Date'))
 
 
+def test_make_nbars():
+    df = pd.DataFrame({'Date': ['12/23/1991', '12/24/1991', '12/25/1991'],
+                       'Open': np.arange(3.0), 'Close': np.arange(10.0, 13)})
+    expected = pd.DataFrame({
+        'Date': ['12/25/1991'],
+        'Open2': 0.0,
+        'Close2': 10.0,
+        'Open1': 1.0,
+        'Close1': 11.0,
+        'Open0': 2.0,
+        'Close0': 12.0
+    })
+    assert expected.equals(fl.make_nbars(df, 2, cols=[
+                           'Open', 'Close'], datetime_col='Date'))
+
+
 def test_make_nbars_future():
     df = pd.DataFrame({'Date': ['12/23/1991', '12/24/1991', '12/25/1991'],
                        'Open': np.arange(3.0), 'Close': np.arange(10.0, 13)})
