@@ -1,17 +1,16 @@
-import numpy as _np
-import pandas as _pd
+import numpy as np
+import pandas as pd
 import warnings
 from sklearn.model_selection._split import _BaseKFold
-from typing import List as _List
-from typing import Text as _Text
-from typing import Tuple as _Tuple
-from typing import Union as _Union
+from typing import List as List
+from typing import Tuple as Tuple
+from typing import Union as Union
 from debtcollector import moves
 warnings.simplefilter('always')
 
 __all__ = ['make_nbars_past', 'make_nbars', 'make_nbars_future', 'split_data', 'PurgedKFold']
 
-def make_nbars_past(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close'], datetime_col: _Union[_Text, None] = 'Date') -> _pd.DataFrame:
+def make_nbars_past(df: pd.DataFrame, n_bars: int, cols: List[str] = ['Close'], datetime_col: Union[str, None] = 'Date') -> pd.DataFrame:
     """Make n bars dataframe seeing past n bars.
     The row size of `df` must be greater than or equal to `n_bars`, or raise ValueError.
     """
@@ -24,12 +23,12 @@ def make_nbars_past(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close
         inc = n_bars - i
         for col in cols:
             df[f'{col}{i}'] = df[f'{col}{n_bars}'][inc:].append(
-                _pd.Series([_np.nan]*inc)).reset_index(drop=True)
+                pd.Series([np.nan]*inc)).reset_index(drop=True)
 
     # correct bar date (or datetime)
     if datetime_col is not None:
         df[datetime_col] = df[datetime_col][n_bars:].append(
-            _pd.Series([_np.nan]*n_bars)).reset_index(drop=True)
+            pd.Series([np.nan]*n_bars)).reset_index(drop=True)
 
     df = df.dropna()
 
@@ -39,7 +38,7 @@ def make_nbars_past(df: _pd.DataFrame, n_bars: int, cols: _List[_Text] = ['Close
 make_nbars = moves.moved_function(make_nbars_past, 'make_nbars', __name__)
 
 
-def make_nbars_future(df: _pd.DataFrame, n_bars: int, cols: _List[str] = ['Close'], datetime_col: _Union[str, None] = 'Date') -> _pd.DataFrame:
+def make_nbars_future(df: pd.DataFrame, n_bars: int, cols: List[str] = ['Close'], datetime_col: Union[str, None] = 'Date') -> pd.DataFrame:
     """Make n bars dataframe seeing future n bars.
     The row size of `df` must be greater than or equal to `n_bars`, or raise ValueError.
 
@@ -63,14 +62,14 @@ def make_nbars_future(df: _pd.DataFrame, n_bars: int, cols: _List[str] = ['Close
     for i in range(1, n_bars+1):
         for col in cols:
             df[f'{col}{i}'] = df[f'{col}0'][i:].append(
-                _pd.Series([_np.nan]*i)).reset_index(drop=True)
+                pd.Series([np.nan]*i)).reset_index(drop=True)
 
     df = df.dropna()
 
     return df
 
 
-def split_data(df: _pd.DataFrame, ratio: float, purging: bool = True, n_bars: int = 10) -> _Tuple[_pd.DataFrame, _pd.DataFrame]:
+def split_data(df: pd.DataFrame, ratio: float, purging: bool = True, n_bars: int = 10) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """split data into two
 
     Args:
@@ -80,7 +79,7 @@ def split_data(df: _pd.DataFrame, ratio: float, purging: bool = True, n_bars: in
         n_bars (int, optional): Period of one sample. Defaults to 10.
 
     Returns:
-        Tuple[_pd.DataFrame, _pd.DataFrame]: Pair of the splitted data.
+        Tuple[pd.DataFrame, pd.DataFrame]: Pair of the splitted data.
     """
     split_idx = int(df.shape[0] * ratio)
     df1 = df[:split_idx]
@@ -112,10 +111,10 @@ class PurgedKFold(_BaseKFold):
 
     def split(self, X, y=None, groups=None):
         train_ratio = (self.n_splits - 1) / self.n_splits
-        indices = _np.arange(X.shape[0])
+        indices = np.arange(X.shape[0])
         n_embargo = int(X.shape[0] * self.pct_embargo)
         test_starts = [(i[0], i[-1]+1)
-                       for i in _np.array_split(indices, self.n_splits)]
+                       for i in np.array_split(indices, self.n_splits)]
         for i, j in test_starts:
             if i != 0 and self.n_overlaps > 0:
                 train_f_purge = round(self.n_overlaps * train_ratio)
@@ -132,8 +131,8 @@ class PurgedKFold(_BaseKFold):
             else:
                 test_idx1 = train_l_idx0 = j
 
-            train_f_indices = _pd.Series(X.iloc[0:train_f_idx1].index)
-            test_indices = _pd.Series(X.iloc[test_idx0:test_idx1].index)
-            train_l_indices = _pd.Series(X.iloc[train_l_idx0:].index)
-            train_indices = _pd.concat([train_f_indices, train_l_indices])
+            train_f_indices = pd.Series(X.iloc[0:train_f_idx1].index)
+            test_indices = pd.Series(X.iloc[test_idx0:test_idx1].index)
+            train_l_indices = pd.Series(X.iloc[train_l_idx0:].index)
+            train_indices = pd.concat([train_f_indices, train_l_indices])
             yield train_indices, test_indices
